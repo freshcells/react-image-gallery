@@ -15,6 +15,7 @@ class App extends React.Component {
       infinite: true,
       showThumbnails: true,
       showNav: true,
+      showThumbNav: true,
       slideInterval: 2000,
       fullscreen: false,
     }
@@ -117,6 +118,18 @@ class App extends React.Component {
       {
         original: 'http://lorempixel.com/1000/600/food/10/',
         thumbnail: 'http://lorempixel.com/100/75/food/10/'
+      },
+      {
+        original: 'http://lorempixel.com/1000/600/food/11/',
+        thumbnail: 'http://lorempixel.com/100/75/food/11/'
+      },
+      {
+        original: 'http://lorempixel.com/1000/600/food/12/',
+        thumbnail: 'http://lorempixel.com/100/75/food/12/'
+      },
+      {
+        original: 'http://lorempixel.com/1000/600/food/13/',
+        thumbnail: 'http://lorempixel.com/100/75/food/13/'
       }
 
     ]
@@ -138,6 +151,7 @@ class App extends React.Component {
           showThumbnails={this.state.showThumbnails}
           showIndex={this.state.showIndex}
           showNav={this.state.showNav}
+          showThumbNav={this.state.showThumbNav}
           slideInterval={parseInt(this.state.slideInterval)}
           autoPlay={this.state.isPlaying}
           slideOnThumbnailHover={this.state.slideOnThumbnailHover}
@@ -213,6 +227,14 @@ class App extends React.Component {
                 onChange={this._handleCheckboxChange.bind(this, 'showNav')}
                 checked={this.state.showNav}/>
                 <label htmlFor='show_navigation'>show navigation</label>
+            </li>
+            <li>
+              <input
+                id='show_thumb_navigation'
+                type='checkbox'
+                onChange={this._handleCheckboxChange.bind(this, 'showThumbNav')}
+                checked={this.state.showThumbNav}/>
+                <label htmlFor='show_thumb_navigation'>show thumb navigation</label>
             </li>
             <li>
               <input

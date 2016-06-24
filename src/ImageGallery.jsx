@@ -305,27 +305,40 @@ export default class ImageGallery extends React.Component {
     }
   }
 
+  _canScrollThumbsLeft() {
+    return this.state.thumbsTranslateX < 0
+  }
+
+  _canScrollThumbsRight() {
+    return this.state.thumbsTranslateX > -this._getMaxThumbsOffset()
+  }
+
+
   _updateThumbnailTranslateX(prevState) {
     if (this.state.currentIndex === 0) {
       this._setThumbsTranslateX(0)
     } else {
-      let indexDifference = Math.abs(
-        prevState.currentIndex - this.state.currentIndex)
-      let scrollX = this._getThumbsTranslateX(indexDifference)
-      if (scrollX > 0) {
-        if (prevState.currentIndex < this.state.currentIndex) {
-          this._setThumbsTranslateX(
-            this.state.thumbsTranslateX - scrollX)
-        } else if (prevState.currentIndex > this.state.currentIndex) {
-          this._setThumbsTranslateX(
-            this.state.thumbsTranslateX + scrollX)
-        }
+      let centerOffset =  this.state.galleryWidth / 2
+      let thumbnailsOffset = this.state.currentIndex * this._getThumbnailWidth() - centerOffset
+      const maxOffset = this._getMaxThumbsOffset();
+
+      if (thumbnailsOffset > maxOffset) {
+        thumbnailsOffset = maxOffset
       }
+      this._setThumbsTranslateX(thumbnailsOffset > 0 ? -thumbnailsOffset : 0)
     }
   }
 
   _setThumbsTranslateX(thumbsTranslateX) {
     this.setState({thumbsTranslateX})
+  }
+
+  _getMaxThumbsOffset() {
+    return this._thumbnails ? this._thumbnails.scrollWidth - this.state.galleryWidth : 0
+  }
+
+  _getThumbnailWidth() {
+    return this._thumbnails ? this._thumbnails.scrollWidth / this._thumbnails.children.length : 0
   }
 
   _getThumbsTranslateX(indexDifference) {
@@ -435,6 +448,30 @@ export default class ImageGallery extends React.Component {
     this.slideToIndex(this.state.currentIndex + 1, event)
   }
 
+  _scrollThumbsLeft(event) {
+    let thumbnailsWidth = this._thumbnails.scrollWidth
+    let totalThumbnails = this._thumbnails.children.length
+    let thumbnailWidth = thumbnailsWidth / totalThumbnails
+
+    if (this.state.thumbsTranslateX + thumbnailWidth < 0) {
+      this._setThumbsTranslateX(this.state.thumbsTranslateX + thumbnailWidth);
+    } else {
+      this._setThumbsTranslateX(0);
+    }
+  }
+
+  _scrollThumbsRight(event) {
+    let thumbnailsWidth = this._thumbnails.scrollWidth
+    let totalThumbnails = this._thumbnails.children.length
+    let thumbnailWidth = thumbnailsWidth / totalThumbnails
+
+    if (this.state.thumbsTranslateX - thumbnailWidth > this.state.galleryWidth - thumbnailsWidth) {
+      this._setThumbsTranslateX(this.state.thumbsTranslateX - thumbnailWidth);
+    } else {
+      this._setThumbsTranslateX(this.state.galleryWidth - thumbnailsWidth);
+    }
+  }
+
   _renderItem(item) {
     const onImageError = this.props.onImageError || this._handleImageError
 
@@ -464,6 +501,8 @@ export default class ImageGallery extends React.Component {
 
     const slideLeft = this._slideLeft.bind(this)
     const slideRight = this._slideRight.bind(this)
+    const scrollThumbsLeft = this._scrollThumbsLeft.bind(this)
+    const scrollThumbsRight = this._scrollThumbsRight.bind(this)
 
     let slides = []
     let thumbnails = []
@@ -616,6 +655,25 @@ export default class ImageGallery extends React.Component {
         {
           this.props.showThumbnails &&
             <div className='image-gallery-thumbnails'>
+              {
+                this.props.showThumbNav &&
+                  <span key='nav'>
+                    {
+                      this._canScrollThumbsLeft() &&
+                      <a
+                        className='image-gallery-left-nav'
+                        onTouchStart={scrollThumbsLeft}
+                        onClick={scrollThumbsLeft}/>
+                    }
+                    {
+                      this._canScrollThumbsRight() &&
+                      <a
+                        className='image-gallery-right-nav'
+                        onTouchStart={scrollThumbsRight}
+                        onClick={scrollThumbsRight}/>
+                    }
+                  </span>
+              }
               <div
                 ref={t => this._thumbnails = t}
                 className='image-gallery-thumbnails-container'
@@ -633,6 +691,7 @@ export default class ImageGallery extends React.Component {
 ImageGallery.propTypes = {
   items: React.PropTypes.array.isRequired,
   showNav: React.PropTypes.bool,
+  showThumbNav: React.PropTypes.bool,
   autoPlay: React.PropTypes.bool,
   lazyLoad: React.PropTypes.bool,
   infinite: React.PropTypes.bool,
@@ -659,6 +718,7 @@ ImageGallery.propTypes = {
 ImageGallery.defaultProps = {
   items: [],
   showNav: true,
+  showThumbNav: false,
   autoPlay: false,
   lazyLoad: false,
   infinite: true,
