@@ -112,7 +112,8 @@ label {
   border-bottom-right-radius: 0;
 }
 
-.app-interval-input {
+.app-interval-input,
+.app-count-input {
   -webkit-appearance: none;
   display: table-cell;
   margin: 0;

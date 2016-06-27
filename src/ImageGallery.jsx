@@ -1,31 +1,31 @@
 import React from 'react'
 import Swipeable from 'react-swipeable'
 
-const MIN_INTERVAL = 500
+const MIN_INTERVAL = 500;
 
 function throttle(func, wait) {
-  let context, args, result
-  let timeout = null
-  let previous = 0
+  let context, args, result;
+  let timeout = null;
+  let previous = 0;
 
   let later = function() {
-    previous = new Date().getTime()
-    timeout = null
-    result = func.apply(context, args)
+    previous = new Date().getTime();
+    timeout = null;
+    result = func.apply(context, args);
     if (!timeout) context = args = null
-  }
+  };
   return function() {
-    let now = new Date().getTime()
-    let remaining = wait - (now - previous)
-    context = this
-    args = arguments
+    let now = new Date().getTime();
+    let remaining = wait - (now - previous);
+    context = this;
+    args = arguments;
     if (remaining <= 0 || remaining > wait) {
       if (timeout) {
-        clearTimeout(timeout)
+        clearTimeout(timeout);
         timeout = null
       }
-      previous = now
-      result = func.apply(context, args)
+      previous = now;
+      result = func.apply(context, args);
       if (!timeout) context = args = null
     } else if (!timeout) {
       timeout = setTimeout(later, remaining)
@@ -37,10 +37,10 @@ function throttle(func, wait) {
 // This is to handle accessing event properties in an asynchronous way
 // https://facebook.github.io/react/docs/events.html#syntheticevent
 function debounceEventHandler(...args) {
-  const throttled = throttle(...args)
+  const throttled = throttle(...args);
   return function(event) {
     if (event) {
-      event.persist()
+      event.persist();
       return throttled(event)
     }
 
@@ -52,29 +52,24 @@ function debounceEventHandler(...args) {
 export default class ImageGallery extends React.Component {
 
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       currentIndex: props.startIndex,
-      thumbsTranslateX: 0,
+      thumbsScrollOffset: 0,
       offsetPercentage: 0,
       galleryWidth: 0
-    }
+    };
 
-    this._slideLeft = debounceEventHandler(this._slideLeft.bind(this), MIN_INTERVAL, true)
-    this._slideRight = debounceEventHandler(this._slideRight.bind(this), MIN_INTERVAL, true)
-    this._handleResize = this._handleResize.bind(this)
+    this._slideLeft = debounceEventHandler(this._slideLeft.bind(this), MIN_INTERVAL, true);
+    this._slideRight = debounceEventHandler(this._slideRight.bind(this), MIN_INTERVAL, true);
+    this._handleResize = this._handleResize.bind(this);
     this._handleKeyDown = this._handleKeyDown.bind(this)
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.galleryWidth !== this.state.galleryWidth ||
         prevProps.showThumbnails !== this.props.showThumbnails) {
-
-      // adjust thumbnail container when window width is adjusted
-      this._setThumbsTranslateX(
-        -this._getThumbsTranslateX(
-          this.state.currentIndex > 0 ? 1 : 0) * this.state.currentIndex)
-
+      this._updateThumbsScrollOffset()
     }
 
     if (prevState.currentIndex !== this.state.currentIndex) {
@@ -82,18 +77,16 @@ export default class ImageGallery extends React.Component {
         this.props.onSlide(this.state.currentIndex)
       }
 
-      this._updateThumbnailTranslateX(prevState)
+      this._updateThumbsScrollOffset()
     }
   }
 
   componentWillMount() {
     this._thumbnailDelay = 300
-    this._ghotClickDelay = 600
-    this._preventGhostClick = false
   }
 
   componentDidMount() {
-    window.setTimeout(() => {this._handleResize(), 300})
+    window.setTimeout(() => {this._handleResize(), 300});
     if (this.props.autoPlay) {
       this.play()
     }
@@ -107,9 +100,9 @@ export default class ImageGallery extends React.Component {
     if (!this.props.disableArrowKeys) {
       window.removeEventListener('keydown', this._handleKeyDown)
     }
-    window.removeEventListener('resize', this._handleResize)
+    window.removeEventListener('resize', this._handleResize);
     if (this._intervalId) {
-      window.clearInterval(this._intervalId)
+      window.clearInterval(this._intervalId);
       this._intervalId = null
     }
   }
@@ -118,7 +111,7 @@ export default class ImageGallery extends React.Component {
     if (this._intervalId) {
       return
     }
-    const {slideInterval} = this.props
+    const {slideInterval} = this.props;
     this._intervalId = window.setInterval(() => {
       if (!this.state.hovering) {
         if (!this.props.infinite && !this._canSlideRight()) {
@@ -127,7 +120,7 @@ export default class ImageGallery extends React.Component {
           this.slideToIndex(this.state.currentIndex + 1)
         }
       }
-    }, slideInterval > MIN_INTERVAL ? slideInterval : MIN_INTERVAL)
+    }, slideInterval > MIN_INTERVAL ? slideInterval : MIN_INTERVAL);
 
     if (this.props.onPlay && callback) {
       this.props.onPlay(this.state.currentIndex)
@@ -137,7 +130,7 @@ export default class ImageGallery extends React.Component {
 
   pause(callback = true) {
     if (this._intervalId) {
-      window.clearInterval(this._intervalId)
+      window.clearInterval(this._intervalId);
       this._intervalId = null
     }
 
@@ -147,7 +140,7 @@ export default class ImageGallery extends React.Component {
   }
 
   fullScreen() {
-    const gallery = this._imageGallery
+    const gallery = this._imageGallery;
 
     if (gallery.requestFullscreen) {
       gallery.requestFullscreen()
@@ -162,16 +155,16 @@ export default class ImageGallery extends React.Component {
 
   slideToIndex(index, event) {
     if (event) {
-      event.preventDefault()
+      event.preventDefault();
       if (this._intervalId) {
         // user triggered event while ImageGallery is playing, reset interval
-        this.pause(false)
+        this.pause(false);
         this.play(false)
       }
     }
 
-    let slideCount = this.props.items.length - 1
-    let currentIndex = index
+    let slideCount = this.props.items.length - 1;
+    let currentIndex = index;
 
     if (index < 0) {
       currentIndex = slideCount
@@ -200,16 +193,16 @@ export default class ImageGallery extends React.Component {
   }
 
   _handleKeyDown(event) {
-    const LEFT_ARROW = 37
-    const RIGHT_ARROW = 39
-    const key = parseInt(event.keyCode || event.which || 0)
+    const LEFT_ARROW = 37;
+    const RIGHT_ARROW = 39;
+    const key = parseInt(event.keyCode || event.which || 0);
 
     switch(key) {
       case LEFT_ARROW:
         if (this._canSlideLeft() && !this._intervalId) {
           this._slideLeft()
         }
-        break
+        break;
       case RIGHT_ARROW:
         if (this._canSlideRight() && !this._intervalId) {
           this._slideRight()
@@ -220,9 +213,9 @@ export default class ImageGallery extends React.Component {
 
   _handleMouseOverThumbnails(index) {
     if (this.props.slideOnThumbnailHover) {
-      this.setState({hovering: true})
+      this.setState({hovering: true});
       if (this._thumbnailTimer) {
-        window.clearTimeout(this._thumbnailTimer)
+        window.clearTimeout(this._thumbnailTimer);
         this._thumbnailTimer = null
       }
       this._thumbnailTimer = window.setTimeout(() => {
@@ -233,8 +226,8 @@ export default class ImageGallery extends React.Component {
 
   _handleMouseLeaveThumbnails() {
     if (this._thumbnailTimer) {
-      window.clearTimeout(this._thumbnailTimer)
-      this._thumbnailTimer = null
+      window.clearTimeout(this._thumbnailTimer);
+      this._thumbnailTimer = null;
       if (this.props.autoPlay === true) {
         this.play(false)
       }
@@ -262,7 +255,7 @@ export default class ImageGallery extends React.Component {
   }
 
   _handleOnSwipedTo(index) {
-    let slideTo = this.state.currentIndex
+    let slideTo = this.state.currentIndex;
     if (Math.abs(this.state.offsetPercentage) > 30 || this.state.isFlick) {
       slideTo += index
     }
@@ -281,7 +274,7 @@ export default class ImageGallery extends React.Component {
   }
 
   _handleSwiping(index, _, delta) {
-    const offsetPercentage = index * (delta / this.state.galleryWidth * 100)
+    const offsetPercentage = index * (delta / this.state.galleryWidth * 100);
     this.setState({offsetPercentage: offsetPercentage, style: {}})
   }
 
@@ -305,77 +298,61 @@ export default class ImageGallery extends React.Component {
     }
   }
 
+  _canScrollThumbs() {
+    return this.props.showThumbNav && this._thumbnails && this.state.galleryWidth < this._thumbnails.scrollWidth;
+  }
+
   _canScrollThumbsLeft() {
-    return this.state.thumbsTranslateX < 0
+    return this.props.infinite || this.state.thumbsScrollOffset < 0
   }
 
   _canScrollThumbsRight() {
-    return this.state.thumbsTranslateX > -this._getMaxThumbsOffset()
+    return this.props.infinite || this.state.thumbsScrollOffset > this._getMaxThumbsOffset()
   }
 
-
-  _updateThumbnailTranslateX(prevState) {
+  _updateThumbsScrollOffset() {
     if (this.state.currentIndex === 0) {
-      this._setThumbsTranslateX(0)
+      this._setThumbsScrollOffset(0)
     } else {
-      let centerOffset =  this.state.galleryWidth / 2
-      let thumbnailsOffset = this.state.currentIndex * this._getThumbnailWidth() - centerOffset
+      let centerOffset =  this.state.galleryWidth / 2;
+      let thumbnailsOffset = centerOffset - this.state.currentIndex * this._getThumbnailWidth();
       const maxOffset = this._getMaxThumbsOffset();
 
-      if (thumbnailsOffset > maxOffset) {
+      if (thumbnailsOffset < maxOffset) {
         thumbnailsOffset = maxOffset
       }
-      this._setThumbsTranslateX(thumbnailsOffset > 0 ? -thumbnailsOffset : 0)
+      this._setThumbsScrollOffset(thumbnailsOffset < 0 ? thumbnailsOffset : 0)
     }
   }
 
-  _setThumbsTranslateX(thumbsTranslateX) {
-    this.setState({thumbsTranslateX})
+  _setThumbsScrollOffset(thumbsScrollOffset) {
+    this.setState({thumbsScrollOffset})
   }
 
   _getMaxThumbsOffset() {
-    return this._thumbnails ? this._thumbnails.scrollWidth - this.state.galleryWidth : 0
+    return this._thumbnails ? this.state.galleryWidth - this._thumbnails.scrollWidth : 0
   }
 
   _getThumbnailWidth() {
     return this._thumbnails ? this._thumbnails.scrollWidth / this._thumbnails.children.length : 0
   }
 
-  _getThumbsTranslateX(indexDifference) {
-    if (this.props.disableThumbnailScroll) {
-      return 0
-    }
-
-    if (this._thumbnails) {
-      if (this._thumbnails.scrollWidth <= this.state.galleryWidth) {
-        return 0
-      }
-      let totalThumbnails = this._thumbnails.children.length
-      // total scroll-x required to see the last thumbnail
-      let totalScrollX = this._thumbnails.scrollWidth - this.state.galleryWidth
-      // scroll-x required per index change
-      let perIndexScrollX = totalScrollX / (totalThumbnails - 1)
-
-      return indexDifference * perIndexScrollX
-    }
-  }
-
   _getAlignmentClassName(index) {
-    let {currentIndex} = this.state
-    let alignment = ''
-    const LEFT = 'left'
-    const CENTER = 'center'
-    const RIGHT = 'right'
+    let {currentIndex} = this.state;
+    let alignment = '';
+    const LEFT = 'left';
+    const CENTER = 'center';
+    const RIGHT = 'right';
 
     switch (index) {
       case (currentIndex - 1):
-        alignment = ` ${LEFT}`
-        break
+        alignment = ` ${LEFT}`;
+        break;
       case (currentIndex):
-        alignment = ` ${CENTER}`
-        break
+        alignment = ` ${CENTER}`;
+        break;
       case (currentIndex + 1):
-        alignment = ` ${RIGHT}`
+        alignment = ` ${RIGHT}`;
         break
     }
 
@@ -393,12 +370,12 @@ export default class ImageGallery extends React.Component {
   }
 
   _getSlideStyle(index) {
-    const {currentIndex, offsetPercentage} = this.state
-    const basetranslateX = -100 * currentIndex
-    const totalSlides = this.props.items.length - 1
+    const {currentIndex, offsetPercentage} = this.state;
+    const basetranslateX = -100 * currentIndex;
+    const totalSlides = this.props.items.length - 1;
 
-    let translateX = basetranslateX + (index * 100) + offsetPercentage
-    let zIndex = 1
+    let translateX = basetranslateX + (index * 100) + offsetPercentage;
+    let zIndex = 1;
 
     if (this.props.infinite && this.props.items.length > 2) {
       if (currentIndex === 0 && index === totalSlides) {
@@ -417,7 +394,7 @@ export default class ImageGallery extends React.Component {
       zIndex = 2
     }
 
-    const translate3d = `translate3d(${translateX}%, 0, 0)`
+    const translate3d = `translate3d(${translateX}%, 0, 0)`;
 
     return {
       WebkitTransform: translate3d,
@@ -430,7 +407,7 @@ export default class ImageGallery extends React.Component {
   }
 
   _getThumbnailStyle() {
-    const translate3d = `translate3d(${this.state.thumbsTranslateX}px, 0, 0)`
+    const translate3d = `translate3d(${this.state.thumbsScrollOffset}px, 0, 0)`;
     return {
       WebkitTransform: translate3d,
       MozTransform: translate3d,
@@ -448,32 +425,35 @@ export default class ImageGallery extends React.Component {
     this.slideToIndex(this.state.currentIndex + 1, event)
   }
 
-  _scrollThumbsLeft(event) {
-    let thumbnailsWidth = this._thumbnails.scrollWidth
-    let totalThumbnails = this._thumbnails.children.length
-    let thumbnailWidth = thumbnailsWidth / totalThumbnails
+  _scrollThumbsLeft() {
+    let thumbnailsWidth = this._thumbnails.scrollWidth;
+    let totalThumbnails = this._thumbnails.children.length;
+    let thumbnailWidth  = this._getThumbnailWidth();
 
-    if (this.state.thumbsTranslateX + thumbnailWidth < 0) {
-      this._setThumbsTranslateX(this.state.thumbsTranslateX + thumbnailWidth);
+    if (this.state.thumbsScrollOffset + thumbnailWidth < 0) {
+      this._setThumbsScrollOffset(this.state.thumbsScrollOffset + thumbnailWidth);
+    } else if (this.state.thumbsScrollOffset === 0 && this.props.infinite) {
+      this._setThumbsScrollOffset(this._getMaxThumbsOffset());
     } else {
-      this._setThumbsTranslateX(0);
+      this._setThumbsScrollOffset(0);
     }
   }
 
-  _scrollThumbsRight(event) {
-    let thumbnailsWidth = this._thumbnails.scrollWidth
-    let totalThumbnails = this._thumbnails.children.length
-    let thumbnailWidth = thumbnailsWidth / totalThumbnails
+  _scrollThumbsRight() {
+    let thumbnailWidth = this._getThumbnailWidth();
+    let maxThumbsOffset = this._getMaxThumbsOffset();
 
-    if (this.state.thumbsTranslateX - thumbnailWidth > this.state.galleryWidth - thumbnailsWidth) {
-      this._setThumbsTranslateX(this.state.thumbsTranslateX - thumbnailWidth);
+    if (this.state.thumbsScrollOffset - thumbnailWidth > maxThumbsOffset) {
+      this._setThumbsScrollOffset(this.state.thumbsScrollOffset - thumbnailWidth);
+    } else if (this.state.thumbsScrollOffset === maxThumbsOffset && this.props.infinite) {
+      this._setThumbsScrollOffset(0);
     } else {
-      this._setThumbsTranslateX(this.state.galleryWidth - thumbnailsWidth);
+      this._setThumbsScrollOffset(maxThumbsOffset);
     }
   }
 
   _renderItem(item) {
-    const onImageError = this.props.onImageError || this._handleImageError
+    const onImageError = this.props.onImageError || this._handleImageError;
 
     return (
       <div className='image-gallery-image'>
@@ -496,27 +476,27 @@ export default class ImageGallery extends React.Component {
   }
 
   render() {
-    const {currentIndex} = this.state
-    const thumbnailStyle = this._getThumbnailStyle()
+    const {currentIndex} = this.state;
+    const thumbnailStyle = this._getThumbnailStyle();
 
-    const slideLeft = this._slideLeft.bind(this)
-    const slideRight = this._slideRight.bind(this)
-    const scrollThumbsLeft = this._scrollThumbsLeft.bind(this)
-    const scrollThumbsRight = this._scrollThumbsRight.bind(this)
+    const slideLeft = this._slideLeft.bind(this);
+    const slideRight = this._slideRight.bind(this);
+    const scrollThumbsLeft = this._scrollThumbsLeft.bind(this);
+    const scrollThumbsRight = this._scrollThumbsRight.bind(this);
 
-    let slides = []
-    let thumbnails = []
-    let bullets = []
+    let slides = [];
+    let thumbnails = [];
+    let bullets = [];
 
     this.props.items.map((item, index) => {
-      const alignment = this._getAlignmentClassName(index)
+      const alignment = this._getAlignmentClassName(index);
       const originalClass = item.originalClass ?
-        ` ${item.originalClass}` : ''
+        ` ${item.originalClass}` : '';
       const thumbnailClass = item.thumbnailClass ?
-        ` ${item.thumbnailClass}` : ''
+        ` ${item.thumbnailClass}` : '';
 
       const renderItem = item.renderItem ||
-        this.props.renderItem || this._renderItem.bind(this)
+        this.props.renderItem || this._renderItem.bind(this);
 
       const slide = (
         <div
@@ -527,7 +507,7 @@ export default class ImageGallery extends React.Component {
         >
           {renderItem(item)}
         </div>
-      )
+      );
 
       if (this.props.lazyLoad) {
         if (alignment) {
@@ -537,7 +517,7 @@ export default class ImageGallery extends React.Component {
         slides.push(slide)
       }
 
-      let onThumbnailError = this._handleImageError
+      let onThumbnailError = this._handleImageError;
       if (this.props.onThumbnailError) {
         onThumbnailError = this.props.onThumbnailError
       }
@@ -578,7 +558,7 @@ export default class ImageGallery extends React.Component {
           </li>
         )
       }
-    })
+    });
 
     return (
       <section ref={i => this._imageGallery = i} className='image-gallery'>
@@ -656,7 +636,7 @@ export default class ImageGallery extends React.Component {
           this.props.showThumbnails &&
             <div className='image-gallery-thumbnails'>
               {
-                this.props.showThumbNav &&
+                this._canScrollThumbs() &&
                   <span key='nav'>
                     {
                       this._canScrollThumbsLeft() &&
@@ -713,7 +693,7 @@ ImageGallery.propTypes = {
   onImageError: React.PropTypes.func,
   onThumbnailError: React.PropTypes.func,
   renderItem: React.PropTypes.func,
-}
+};
 
 ImageGallery.defaultProps = {
   items: [],
@@ -731,4 +711,4 @@ ImageGallery.defaultProps = {
   indexSeparator: ' / ',
   startIndex: 0,
   slideInterval: 3000
-}
+};

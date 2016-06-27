@@ -10,6 +10,7 @@ class App extends React.Component {
     this.state = {
       isPlaying: false,
       showIndex: false,
+      slideCount: 10,
       slideOnThumbnailHover: false,
       showBullets: true,
       infinite: true,
@@ -74,65 +75,17 @@ class App extends React.Component {
   }
 
   render() {
-    const images = [
-      {
-        original: 'http://lorempixel.com/1000/600/food/1/',
-        thumbnail: 'http://lorempixel.com/100/75/food/1/',
+    const images = [];
+
+    for (var i = 0; i < this.state.slideCount; i ++) {
+      images.push({
+        original: 'http://placehold.it/1000x600/' + i,
+        thumbnail: 'http://placehold.it/100x75/' + i,
         originalClass: 'featured-slide',
         thumbnailClass: 'featured-thumb',
-        description: 'Custom class for slides & thumbnails'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/2/',
-        thumbnail: 'http://lorempixel.com/100/75/food/2/',
-        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing...'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/3/',
-        thumbnail: 'http://lorempixel.com/100/75/food/3/'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/4/',
-        thumbnail: 'http://lorempixel.com/100/75/food/4/'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/5/',
-        thumbnail: 'http://lorempixel.com/100/75/food/5/'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/6/',
-        thumbnail: 'http://lorempixel.com/100/75/food/6/'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/7/',
-        thumbnail: 'http://lorempixel.com/100/75/food/7/'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/8/',
-        thumbnail: 'http://lorempixel.com/100/75/food/8/'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/9/',
-        thumbnail: 'http://lorempixel.com/100/75/food/9/'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/10/',
-        thumbnail: 'http://lorempixel.com/100/75/food/10/'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/11/',
-        thumbnail: 'http://lorempixel.com/100/75/food/11/'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/12/',
-        thumbnail: 'http://lorempixel.com/100/75/food/12/'
-      },
-      {
-        original: 'http://lorempixel.com/1000/600/food/13/',
-        thumbnail: 'http://lorempixel.com/100/75/food/13/'
-      }
-
-    ]
+        description: 'Description ' + i
+      })
+    }
 
     return (
 
@@ -191,6 +144,16 @@ class App extends React.Component {
                   type='text'
                   onChange={this._handleInputChange.bind(this, 'slideInterval')}
                   value={this.state.slideInterval}/>
+              </div>
+            </li>
+           <li>
+              <div className='app-interval-input-group'>
+                <span className='app-interval-label'>slide count</span>
+                <input
+                  className='app-count-input'
+                  type='text'
+                  onChange={this._handleInputChange.bind(this, 'slideCount')}
+                  value={this.state.slideCount}/>
               </div>
             </li>
           </ul>
